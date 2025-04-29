@@ -1,0 +1,20 @@
+name: RDP Windows
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Setup Ngrok
+      run: |
+        choco install ngrok
+        ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Enable RDP
+      run: |
+        net user administrator /active:yes
+        net user administrator 12345678
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - name: Start Ngrok Tunnel
+      run: ngrok tcp 3389
